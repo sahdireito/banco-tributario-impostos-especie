@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banco de Questões OAB — Impostos em Espécie</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #f4f1eb;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  color: #1a1a1a;
+}
+
+.page-header { max-width: 780px; margin: 0 auto 2rem; }
+
+.tema-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  background: #3C3489;
+  color: #fff;
+  border-radius: 5px;
+  padding: 4px 12px;
+  margin-bottom: 0.75rem;
+}
+
+.page-title { font-size: 26px; font-weight: 800; color: #1a1a1a; line-height: 1.2; margin-bottom: 0.4rem; }
+.page-sub { font-size: 14px; color: #888; }
+
+.score-bar {
+  max-width: 780px;
+  margin: 0 auto 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  flex-wrap: wrap;
+}
+
+.score-item { text-align: center; }
+.score-num { font-size: 22px; font-weight: 800; color: #1a1a1a; line-height: 1; }
+.score-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+.score-num.acertos { color: #3B6D11; }
+.score-num.erros { color: #A32D2D; }
+
+.progress-wrap { flex: 1; min-width: 120px; }
+.progress-track { background: #ede9e0; border-radius: 99px; height: 8px; overflow: hidden; }
+.progress-fill { background: #534AB7; height: 8px; border-radius: 99px; transition: width 0.4s ease; width: 0%; }
+.progress-label { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+.nav-wrap { max-width: 780px; margin: 0 auto 1.5rem; display: flex; flex-wrap: wrap; gap: 6px; }
+
+.nav-btn {
+  width: 38px; height: 38px; border-radius: 8px; border: 1.5px solid #ddd;
+  background: #fff; font-size: 13px; font-weight: 600; color: #888;
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-btn:hover { border-color: #AFA9EC; color: #534AB7; }
+.nav-btn.active { border-color: #534AB7; background: #534AB7; color: #fff; }
+.nav-btn.correto { border-color: #639922; background: #EAF3DE; color: #3B6D11; }
+.nav-btn.errado { border-color: #E24B4A; background: #FCEBEB; color: #A32D2D; }
+
+.container { max-width: 780px; margin: 0 auto; }
+
+.q-card {
+  background: #fff; border-radius: 16px; padding: 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07); display: none; animation: fadeIn 0.2s ease;
+}
+.q-card.visible { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.q-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap; }
+.q-num { font-size: 12px; font-weight: 700; background: #EEEDFE; color: #3C3489; border-radius: 5px; padding: 4px 10px; }
+.q-exame { font-size: 12px; color: #aaa; }
+.q-titulo { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 1rem; line-height: 1.35; }
+
+.enunciado {
+  font-size: 14px; line-height: 1.8; color: #444; border-left: 3px solid #534AB7;
+  padding-left: 1rem; margin-bottom: 1.25rem; background: #faf9f7;
+  border-radius: 0 8px 8px 0; padding: 0.875rem 1rem;
+}
+
+.comando { font-size: 14px; font-weight: 700; color: #534AB7; margin-bottom: 1rem; }
+
+.alternativas { display: flex; flex-direction: column; gap: 9px; margin-bottom: 1.25rem; }
+
+.alt-btn {
+  display: flex; align-items: flex-start; gap: 13px; background: #f8f7f4;
+  border: 1.5px solid #e5e2d9; border-radius: 10px; padding: 13px 15px;
+  cursor: pointer; text-align: left; transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  width: 100%; font-family: inherit;
+}
+.alt-btn:hover:not(:disabled) { border-color: #AFA9EC; background: #EEEDFE; transform: translateX(2px); }
+.alt-btn:disabled { cursor: default; }
+
+.alt-letter {
+  font-size: 12px; font-weight: 700; color: #aaa; width: 22px; height: 22px; min-width: 22px;
+  border-radius: 50%; border: 1.5px solid #ccc; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.15s;
+}
+.alt-text { font-size: 14px; line-height: 1.65; color: #333; }
+
+.alt-btn.correct { background: #EAF3DE; border-color: #639922; }
+.alt-btn.correct .alt-letter { background: #639922; border-color: #639922; color: #fff; }
+.alt-btn.correct .alt-text { color: #27500A; font-weight: 600; }
+
+.alt-btn.wrong { background: #FCEBEB; border-color: #E24B4A; }
+.alt-btn.wrong .alt-letter { background: #E24B4A; border-color: #E24B4A; color: #fff; }
+.alt-btn.wrong .alt-text { color: #791F1F; }
+
+.feedback { display: none; border-radius: 10px; padding: 1rem 1.25rem; font-size: 14px; line-height: 1.75; margin-bottom: 1rem; }
+.feedback.show { display: block; }
+.feedback.acerto { background: #EAF3DE; border: 1px solid #97C459; color: #27500A; }
+.feedback.erro { background: #FCEBEB; border: 1px solid #F09595; color: #791F1F; }
+
+.fundamento-box {
+  display: none; border-radius: 10px; padding: 1rem 1.25rem; font-size: 13px; line-height: 1.8;
+  color: #555; border-left: 3px solid #534AB7; background: #f4f2fd; margin-bottom: 1rem;
+}
+.fundamento-box.show { display: block; }
+.caqui-box {
+  display: none; border-radius: 10px; padding: 1rem 1.25rem; font-size: 13px; line-height: 1.8;
+  color: #5a3e00; border-left: 3px solid #e8a000; background: #fff8e6; margin-bottom: 1rem;
+}
+.caqui-box.show { display: block; }
+.caqui-box h4 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #b87300; margin-bottom: 0.6rem; }
+.fundamento-box h4 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #534AB7; margin-bottom: 0.6rem; }
+
+.card-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 0.5rem; }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  background: transparent; border: 1.5px solid #ddd; border-radius: 8px; padding: 7px 16px;
+  font-size: 13px; font-family: inherit; color: #666; cursor: pointer; transition: all 0.15s; display: none;
+}
+.btn:hover { border-color: #534AB7; color: #534AB7; }
+.btn.show { display: inline-flex; align-items: center; gap: 5px; }
+.btn.purple { border-color: #AFA9EC; color: #534AB7; }
+.btn.caqui { border-color: #e8a000; color: #b87300; }
+.btn.caqui:hover { background: #fff8e6; }
+.btn.purple:hover { background: #EEEDFE; }
+
+.status-text { font-size: 12px; color: #aaa; font-style: italic; }
+
+.pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; gap: 10px; }
+.pg-btn {
+  background: #fff; border: 1.5px solid #ddd; border-radius: 9px; padding: 9px 20px;
+  font-size: 14px; font-weight: 600; font-family: inherit; color: #555; cursor: pointer; transition: all 0.15s;
+}
+.pg-btn:hover { border-color: #534AB7; color: #534AB7; }
+.pg-btn:disabled { opacity: 0.3; cursor: default; }
+.pg-btn.primary { background: #534AB7; border-color: #534AB7; color: #fff; }
+.pg-btn.primary:hover { background: #3C3489; }
+.pg-info { font-size: 13px; color: #aaa; }
+
+@media (max-width: 600px) {
+  body { padding: 1rem 0.75rem; }
+  .q-card { padding: 1.25rem; }
+  .page-title { font-size: 20px; }
+  .score-bar { gap: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <span class="tema-badge">📌 Direito Tributário</span>
+  <h1 class="page-title">Impostos em Espécie</h1>
+  <p class="page-sub">26 questões autorais, no padrão OAB/concursos — CTN, CF/88, LC 116/2003 e EC 132/2023</p>
+</div>
+
+<div class="score-bar">
+  <div class="score-item"><div class="score-num" id="sc-total">0</div><div class="score-label">Respondidas</div></div>
+  <div class="score-item"><div class="score-num acertos" id="sc-acertos">0</div><div class="score-label">Acertos</div></div>
+  <div class="score-item"><div class="score-num erros" id="sc-erros">0</div><div class="score-label">Erros</div></div>
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label">0 de 26 respondidas</div>
+  </div>
+</div>
+
+<div class="nav-wrap" id="nav-wrap"></div>
+
+<div class="container" id="questions-container"></div>
+
+<div class="container">
+  <div class="pagination">
+    <button class="pg-btn" id="btn-prev" onclick="navPage(-1)">← Anterior</button>
+    <span class="pg-info" id="pg-info">1 de 26</span>
+    <button class="pg-btn primary" id="btn-next" onclick="navPage(1)">Próxima →</button>
+  </div>
+</div>
+
+<script>
+const QUESTOES = [
+{
+  num: 1,
+  exame: "",
+  titulo: "Competência Tributária para Instituir Impostos",
+  enunciado: "A competência tributária para instituir impostos, na sistemática constitucional brasileira, apresenta características próprias que a diferenciam de mera atribuição de arrecadação.",
+  comando: "Sobre o tema, assinale a alternativa correta.",
+  gabarito: "A",
+  alternativas: {
+    A: "A competência para instituir impostos é privativa, cabendo a cada ente federativo instituir apenas os impostos que lhe foram constitucionalmente atribuídos.",
+    B: "A União pode instituir, mediante lei ordinária, qualquer imposto não previsto na Constituição, desde que urgente.",
+    C: "Os Municípios podem instituir imposto sobre grandes fortunas, desde que autorizados por convênio no CONFAZ.",
+    D: "A competência tributária, uma vez atribuída, pode ser delegada a outro ente por simples decreto."
+  },
+  feedbacks: {
+    A: "Correta! A competência para instituir impostos é privativa e rígida: a CF/88 distribui taxativamente os impostos entre União (art. 153), Estados/DF (art. 155) e Municípios (art. 156). É indelegável, nos termos do art. 7º do CTN.",
+    B: "Incorreta. Imposto novo, fora da lista constitucional, exige lei complementar (competência residual, art. 154, I, CF) — nunca lei ordinária, e não existe exceção por 'urgência'.",
+    C: "Incorreta. O IGF é de competência privativa da União (art. 153, VII, CF). Convênio no CONFAZ não tem o condão de transferir competência entre entes federativos.",
+    D: "Incorreta. A competência tributária é indelegável (art. 7º, CTN). Apenas a capacidade tributária ativa — arrecadar e fiscalizar — pode ser conferida a outra pessoa jurídica de direito público."
+  },
+  fundamento: "Art. 153, 155 e 156, CF/88 — distribuição rígida e taxativa da competência para impostos. Art. 7º, CTN — a competência tributária é indelegável; apenas as funções de arrecadar ou fiscalizar tributos podem ser conferidas a outra pessoa jurídica de direito público.",
+  caqui: "Pensa na competência tributária como um crachá de acesso: cada ente só entra nas salas que a Constituição liberou pra ele. A União não empresta o crachá do IGF pro Município, nem repassa isso por decreto. Só quem fiscaliza e arrecada pode ser terceirizado — quem cria o imposto, não."
+},
+{
+  num: 2,
+  exame: "",
+  titulo: "Impostos de Competência da União",
+  enunciado: "A Constituição Federal distribui os impostos entre os entes federativos de forma taxativa, cabendo à União instituir determinado rol de impostos previsto no art. 153.",
+  comando: "São impostos de competência da União, EXCETO:",
+  gabarito: "C",
+  alternativas: {
+    A: "Imposto de Importação (II).",
+    B: "Imposto sobre Produtos Industrializados (IPI).",
+    C: "Imposto sobre a Propriedade de Veículos Automotores (IPVA).",
+    D: "Imposto sobre a Renda e Proventos de Qualquer Natureza (IR)."
+  },
+  feedbacks: {
+    A: "Incorreta (é federal). O II está expressamente previsto no art. 153, I, CF, entre os impostos da União.",
+    B: "Incorreta (é federal). O IPI está previsto no art. 153, IV, CF.",
+    C: "Correta! O IPVA é imposto de competência ESTADUAL (art. 155, III, CF), não federal — é a alternativa que não pertence ao rol do art. 153.",
+    D: "Incorreta (é federal). O IR está previsto no art. 153, III, CF."
+  },
+  fundamento: "Art. 153, CF: impostos federais — II, IE, IR, IPI, IOF, ITR, IGF (não instituído) e, desde a EC 132/2023, o Imposto Seletivo (inciso VIII). Art. 155, III, CF: o IPVA é imposto estadual.",
+  caqui: "Decore o mapa: II, IE, IR, IPI, IOF, ITR e IGF moram na casa da União. IPVA mora na casa do Estado. A banca adora colocar um 'intruso' estadual ou municipal no meio de uma lista federal — treine seu olho pra pegar esse tipo de pegadinha rapidinho."
+},
+{
+  num: 3,
+  exame: "",
+  titulo: "Imposto de Importação (II)",
+  enunciado: "O Imposto de Importação é tradicionalmente classificado como imposto de forte função extrafiscal, funcionando como instrumento de política de comércio exterior.",
+  comando: "Quanto ao Imposto de Importação, assinale a alternativa correta.",
+  gabarito: "A",
+  alternativas: {
+    A: "Seu fato gerador é a entrada de produto estrangeiro no território nacional, e suas alíquotas podem ser alteradas pelo Poder Executivo, nos limites da lei, não se sujeitando aos princípios da anterioridade anual e nonagesimal.",
+    B: "É imposto de competência estadual, com finalidade predominantemente fiscal.",
+    C: "Está sujeito integralmente ao princípio da anterioridade nonagesimal, não podendo suas alíquotas ser majoradas por decreto.",
+    D: "Incide sobre a saída de produtos nacionais destinados ao exterior."
+  },
+  feedbacks: {
+    A: "Correta! O fato gerador do II é a entrada de produto estrangeiro no território nacional (art. 19, CTN). É exceção às duas anterioridades — anual e nonagesimal (art. 150, §1º, CF) —, e suas alíquotas podem ser alteradas por ato do Executivo, nos limites da lei (art. 153, §1º, CF).",
+    B: "Incorreta. O II é imposto federal (art. 153, I, CF) e tem função predominantemente extrafiscal, regulando o comércio exterior.",
+    C: "Incorreta. O II não se sujeita à anterioridade nonagesimal — é exceção às duas anterioridades, podendo ser cobrado de imediato.",
+    D: "Incorreta. A saída de produtos nacionais para o exterior é fato gerador do Imposto de Exportação (IE), não do II."
+  },
+  fundamento: "Art. 19, CTN — fato gerador do II. Art. 153, §1º, CF — alteração de alíquota por ato do Executivo. Art. 150, §1º, CF — exceção às anterioridades anual e nonagesimal.",
+  caqui: "O II é uma 'porta giratória' regulável: o governo pode apertar ou afrouxar a entrada de produtos estrangeiros de um dia para o outro, por decreto, sem esperar o ano seguinte nem 90 dias. É instrumento de política econômica, não só de arrecadação."
+},
+{
+  num: 4,
+  exame: "",
+  titulo: "Imposto de Exportação (IE) — Base de Cálculo",
+  enunciado: "O CTN disciplina, no art. 24, as regras de base de cálculo aplicáveis ao Imposto de Exportação, conforme a alíquota adotada pela lei tributária.",
+  comando: "O Imposto de Exportação (IE) tem como base de cálculo, na modalidade de alíquota específica:",
+  gabarito: "B",
+  alternativas: {
+    A: "O valor da operação de importação equivalente.",
+    B: "A unidade de medida adotada pela lei tributária, quando a alíquota for específica; ou o preço normal da mercadoria (valor da operação), quando ad valorem.",
+    C: "Somente o valor declarado pelo exportador, sem possibilidade de arbitramento pela autoridade fiscal.",
+    D: "O valor de mercado no país de destino da mercadoria."
+  },
+  feedbacks: {
+    A: "Incorreta. O IE não tem qualquer relação com operação de importação — são impostos e fatos geradores distintos (saída x entrada de mercadorias).",
+    B: "Correta! Nos termos do art. 24 do CTN, a base de cálculo do IE é o preço normal (valor da operação) quando a alíquota for ad valorem, ou a unidade de medida adotada pela lei tributária, quando específica.",
+    C: "Incorreta. A autoridade fiscal pode arbitrar o preço quando o valor declarado for de duvidosa credibilidade, nos termos do próprio art. 24, CTN.",
+    D: "Incorreta. A base não é o valor de mercado no país de destino, mas o preço normal da mercadoria no mercado internacional (valor da operação de exportação)."
+  },
+  fundamento: "Art. 24, CTN — base de cálculo do IE. É imposto extrafiscal, exceção às duas anterioridades, com alíquotas alteráveis por ato do Executivo (art. 153, §1º, CF).",
+  caqui: "Alíquota específica = 'por unidade' (tantos reais por tonelada, por exemplo). Alíquota ad valorem = 'por percentual do valor'. O IE usa uma régua ou outra dependendo de como a lei desenhou o imposto para aquele produto."
+},
+{
+  num: 5,
+  exame: "",
+  titulo: "IPI — Seletividade e Não Cumulatividade",
+  enunciado: "O IPI é um dos impostos federais com maior densidade de regras constitucionais específicas, distinguindo-se do ICMS em pontos importantes.",
+  comando: "A respeito do IPI, assinale a alternativa correta.",
+  gabarito: "B",
+  alternativas: {
+    A: "É facultativamente seletivo, em função da essencialidade do produto, à semelhança do ICMS.",
+    B: "É obrigatoriamente seletivo, em função da essencialidade do produto, e obrigatoriamente não cumulativo, compensando-se o que for devido em cada operação com o montante cobrado nas anteriores.",
+    C: "Incide sobre produtos industrializados destinados ao exterior, sem qualquer imunidade.",
+    D: "Está sujeito ao princípio da anterioridade anual, não podendo ser cobrado antes de decorridos 90 dias da lei que o instituiu ou aumentou."
+  },
+  feedbacks: {
+    A: "Incorreta. Ao contrário do ICMS (facultativamente seletivo), o IPI é OBRIGATORIAMENTE seletivo — a Constituição usa o verbo 'será', não 'poderá ser' (art. 153, §3º, I, CF).",
+    B: "Correta! O IPI é obrigatoriamente seletivo (art. 153, §3º, I, CF) e obrigatoriamente não cumulativo (art. 153, §3º, II, CF).",
+    C: "Incorreta. O IPI é imune sobre produtos industrializados destinados ao exterior (art. 153, §3º, III, CF).",
+    D: "Incorreta. O IPI é exceção à anterioridade ANUAL, mas se submete à nonagesimal (art. 150, §1º, CF) — a alternativa inverteu as regras."
+  },
+  fundamento: "Art. 153, §3º, CF — seletividade obrigatória (I), não cumulatividade obrigatória (II) e imunidade na exportação (III). Art. 150, §1º, CF — exceção apenas à anterioridade anual.",
+  caqui: "Compare sempre IPI x ICMS nessa questão: o IPI 'será' seletivo (obrigatório), o ICMS 'poderá ser' seletivo (facultativo). Essa troca de verbo é o detalhe que a banca ama explorar."
+},
+{
+  num: 6,
+  exame: "",
+  titulo: "IOF sobre Operações com Ouro",
+  enunciado: "O ouro pode receber, na legislação tributária, mais de uma qualificação jurídica, o que interfere diretamente na incidência do IOF.",
+  comando: "O IOF incide sobre operações de ouro quando este é definido em lei como:",
+  gabarito: "B",
+  alternativas: {
+    A: "Mercadoria, hipótese em que incide também ICMS na mesma operação.",
+    B: "Ativo financeiro ou instrumento cambial, incidindo o IOF exclusivamente na operação de origem, com repasse do produto da arrecadação ao Estado/DF e ao Município de origem.",
+    C: "Bem de consumo, sujeitando-se ao IPI e ao ICMS cumulativamente.",
+    D: "Reserva de valor, isento de qualquer tributação federal, estadual ou municipal."
+  },
+  feedbacks: {
+    A: "Incorreta. Quando definido como ativo financeiro/instrumento cambial, o ouro sofre incidência exclusiva do IOF — não há bitributação com ICMS nessa hipótese.",
+    B: "Correta! O art. 153, §5º, CF determina que, nessa hipótese, o ouro sujeita-se exclusivamente ao IOF, devido na operação de origem, com repasse de 30% ao Estado/DF e 70% ao Município de origem.",
+    C: "Incorreta. Não há incidência cumulativa de IPI e ICMS quando o ouro é ativo financeiro — a tributação é exclusiva do IOF.",
+    D: "Incorreta. Não há isenção total — há, sim, tributação exclusiva pelo IOF."
+  },
+  fundamento: "Art. 153, §5º, CF — incidência exclusiva do IOF sobre o ouro como ativo financeiro/instrumento cambial, com repasse de 30% ao Estado/DF e 70% ao Município de origem.",
+  caqui: "O ouro tem 'dupla personalidade' tributária: se é mercadoria, segue a lógica normal de ICMS/IPI; se é ativo financeiro, vira exclusividade do IOF, com repartição garantida na própria Constituição — 30% pro Estado, 70% pro Município de origem."
+},
+{
+  num: 7,
+  exame: "",
+  titulo: "Imposto de Renda — Critérios Constitucionais",
+  enunciado: "O art. 153, §2º, I, da Constituição elenca critérios que devem orientar a instituição do Imposto de Renda.",
+  comando: "O Imposto sobre a Renda e Proventos de Qualquer Natureza será informado pelos critérios da:",
+  gabarito: "B",
+  alternativas: {
+    A: "Seletividade, não cumulatividade e essencialidade.",
+    B: "Generalidade, universalidade e progressividade, na forma da lei.",
+    C: "Territorialidade absoluta e regressividade.",
+    D: "Extrafiscalidade exclusiva, sem qualquer função arrecadatória."
+  },
+  feedbacks: {
+    A: "Incorreta. Seletividade e não cumulatividade são critérios do IPI e do ICMS — não do IR.",
+    B: "Correta! O art. 153, §2º, I, CF determina que o IR será informado pelos critérios da generalidade, universalidade e progressividade, na forma da lei.",
+    C: "Incorreta. O IR adota o critério da universalidade (tributa renda de qualquer origem, inclusive auferida no exterior), e não territorialidade absoluta; tampouco é regressivo — é progressivo.",
+    D: "Incorreta. O IR é predominantemente fiscal (arrecadatório), embora também tenha função extrafiscal em hipóteses específicas."
+  },
+  fundamento: "Art. 153, §2º, I, CF — generalidade (todos que praticam o fato gerador são tributados), universalidade (toda renda, de qualquer origem, é tributada) e progressividade (alíquotas maiores para rendas maiores).",
+  caqui: "Decore o trio: Generalidade (vale para todo mundo), Universalidade (vale para toda renda, não importa a origem) e Progressividade (quem ganha mais, paga proporcionalmente mais). G-U-P — o mantra do IR."
+},
+{
+  num: 8,
+  exame: "",
+  titulo: "Imposto Territorial Rural (ITR)",
+  enunciado: "O ITR possui regras constitucionais específicas voltadas a desestimular a manutenção de propriedades rurais improdutivas, além de hipóteses de imunidade.",
+  comando: "Sobre o ITR, assinale a alternativa correta.",
+  gabarito: "A",
+  alternativas: {
+    A: "Será progressivo e terá suas alíquotas fixadas de forma a desestimular a manutenção de propriedades improdutivas, sendo imune sobre pequenas glebas rurais, definidas em lei, quando as explore o proprietário que não possua outro imóvel.",
+    B: "É de competência municipal, podendo ser fiscalizado e cobrado exclusivamente pelos Municípios.",
+    C: "Incide sobre imóveis urbanos e rurais indistintamente, com base na mesma planta de valores do IPTU.",
+    D: "Não admite qualquer forma de imunidade, incidindo inclusive sobre pequenas glebas rurais exploradas pelo proprietário que não possua outro imóvel."
+  },
+  feedbacks: {
+    A: "Correta! O ITR é progressivo, com alíquotas que desestimulam latifúndios improdutivos (art. 153, §4º, I, CF), e é imune sobre pequenas glebas rurais, definidas em lei, quando exploradas pelo único imóvel do proprietário (art. 153, §4º, II, CF).",
+    B: "Incorreta. O ITR é imposto FEDERAL (art. 153, VI, CF). Os Municípios podem, no máximo, optar por fiscalizá-lo e cobrá-lo (art. 153, §4º, III, CF) — não é competência própria municipal.",
+    C: "Incorreta. O ITR incide sobre imóveis RURAIS; o IPTU incide sobre imóveis URBANOS. São bases distintas.",
+    D: "Incorreta. Existe, sim, imunidade expressa para pequenas glebas rurais definidas em lei, exploradas pelo único imóvel do proprietário (art. 153, §4º, II, CF)."
+  },
+  fundamento: "Art. 153, VI e §4º, CF — competência federal, progressividade extrafiscal (inciso I), imunidade de pequenas glebas rurais (inciso II) e opção municipal de fiscalização/cobrança sem redução do imposto (inciso III).",
+  caqui: "O ITR é o 'imposto anti-latifúndio improdutivo': quanto mais parado e mal aproveitado o terreno rural, maior a alíquota. E tem uma rede de proteção: pequena gleba, único imóvel do dono, fica de fora da cobrança."
+},
+{
+  num: 9,
+  exame: "",
+  titulo: "Imposto sobre Grandes Fortunas (IGF)",
+  enunciado: "O art. 153, VII, da CF prevê a competência da União para instituir o Imposto sobre Grandes Fortunas, condicionando sua instituição a requisito formal específico.",
+  comando: "Sobre o IGF, assinale a alternativa correta.",
+  gabarito: "B",
+  alternativas: {
+    A: "Já foi instituído e regulamentado por decreto presidencial, estando em plena cobrança.",
+    B: "Depende de lei complementar para sua instituição e, até o momento, não foi instituído pela União.",
+    C: "É de competência concorrente entre União e Estados.",
+    D: "Pode ser instituído por lei ordinária estadual, mediante convênio no CONFAZ."
+  },
+  feedbacks: {
+    A: "Incorreta. O IGF nunca foi instituído no Brasil — não existe decreto ou lei em vigor cobrando esse imposto.",
+    B: "Correta! O IGF depende de lei complementar (art. 153, VII, CF) e, até hoje, essa lei complementar nunca foi editada pela União.",
+    C: "Incorreta. É competência exclusiva da União — não há concorrência com os Estados.",
+    D: "Incorreta. Não pode ser instituído por lei ordinária, nem por Estado, nem por convênio — apenas por lei complementar federal."
+  },
+  fundamento: "Art. 153, VII, CF — competência da União, condicionada a lei complementar. Até 2026, essa lei complementar nunca foi editada.",
+  caqui: "O IGF é o 'imposto fantasma' do direito tributário brasileiro: está na Constituição desde 1988, mas nunca ganhou vida, porque falta a lei complementar que o regulamente. É clássico de prova justamente por causa dessa curiosidade histórica."
+},
+{
+  num: 10,
+  exame: "",
+  titulo: "ICMS — Não Cumulatividade e Seletividade",
+  enunciado: "O ICMS é o principal imposto estadual, com regras constitucionais específicas sobre cumulatividade e seletividade que frequentemente são confundidas com as do IPI.",
+  comando: "Sobre o ICMS, assinale a alternativa correta.",
+  gabarito: "B",
+  alternativas: {
+    A: "É imposto obrigatoriamente seletivo, nos mesmos moldes do IPI.",
+    B: "É não cumulativo, compensando-se o que for devido em cada operação com o montante cobrado nas anteriores, e poderá ser seletivo em função da essencialidade das mercadorias e serviços.",
+    C: "Não incide sobre serviços de transporte interestadual e intermunicipal, matéria reservada à competência municipal via ISS.",
+    D: "Incide sobre exportações de mercadorias e serviços, sem qualquer imunidade."
+  },
+  feedbacks: {
+    A: "Incorreta. O ICMS é FACULTATIVAMENTE seletivo ('poderá ser seletivo' — art. 155, §2º, III, CF), diferente do IPI, que é obrigatoriamente seletivo.",
+    B: "Correta! O ICMS é obrigatoriamente não cumulativo (art. 155, §2º, I, CF) e facultativamente seletivo (art. 155, §2º, III, CF).",
+    C: "Incorreta. O ICMS incide justamente sobre serviços de transporte interestadual e intermunicipal e de comunicação (art. 155, II, CF) — não é matéria de ISS.",
+    D: "Incorreta. O ICMS é imune nas exportações de mercadorias e serviços (art. 155, §2º, X, 'a', CF), assegurada a manutenção e o aproveitamento do crédito."
+  },
+  fundamento: "Art. 155, II e §2º, CF — não cumulatividade obrigatória (I), seletividade facultativa (III) e imunidade na exportação (X, 'a').",
+  caqui: "Grave o contraste: IPI 'será' seletivo (obrigatório); ICMS 'poderá ser' seletivo (facultativo). Os dois são obrigatoriamente não cumulativos — isso os dois têm em comum."
+},
+{
+  num: 11,
+  exame: "",
+  titulo: "ICMS Monofásico sobre Combustíveis",
+  enunciado: "A EC 33/2001 alterou a sistemática de incidência do ICMS sobre combustíveis e lubrificantes definidos em lei complementar, criando regime diferenciado de tributação.",
+  comando: "Quanto ao ICMS incidente sobre combustíveis definidos em lei complementar, assinale a alternativa correta.",
+  gabarito: "A",
+  alternativas: {
+    A: "Incidirá uma única vez, qualquer que seja a sua finalidade (incidência monofásica), e suas alíquotas serão definidas mediante deliberação dos Estados e do DF, nos termos do art. 155, §4º, CF.",
+    B: "Segue obrigatoriamente o regime plurifásico e não cumulativo comum a todas as mercadorias.",
+    C: "É imposto de competência federal, incluído na base do IPI.",
+    D: "Não pode ter alíquotas diferenciadas por produto, em respeito à isonomia."
+  },
+  feedbacks: {
+    A: "Correta! O art. 155, §4º, CF, incluído pela EC 33/2001, prevê incidência monofásica (uma única vez) sobre combustíveis e lubrificantes definidos em lei complementar, com alíquotas definidas por convênio entre os Estados e o DF, podendo ser diferenciadas por produto.",
+    B: "Incorreta. Justamente o contrário: o regime é monofásico (uma única incidência), diferente da regra geral plurifásica do ICMS.",
+    C: "Incorreta. O ICMS-combustíveis continua sendo imposto estadual — não se confunde com o IPI, imposto federal.",
+    D: "Incorreta. A própria CF admite expressamente alíquotas diferenciadas por produto nesse regime especial (art. 155, §4º, IV, 'c', CF)."
+  },
+  fundamento: "Art. 155, §4º, CF (EC 33/2001) — incidência monofásica sobre combustíveis definidos em lei complementar (LC 192/2022), com alíquotas fixadas por convênio no CONFAZ, podendo ser específicas, diferenciadas por produto ou uniformes em todo o território nacional.",
+  caqui: "Combustível tem uma 'via expressa' de tributação: o ICMS incide uma única vez em toda a cadeia, e quem define a alíquota não é cada Estado sozinho, é o conjunto deles reunido em convênio. É uma exceção clara à lógica normal, plurifásica, do ICMS."
+},
+{
+  num: 12,
+  exame: "",
+  titulo: "IPVA — Embarcações e Aeronaves",
+  enunciado: "O STF já se manifestou expressamente sobre os limites da incidência do IPVA em relação a determinados tipos de veículos, com base na origem histórica do imposto.",
+  comando: "Sobre o IPVA, considerando a jurisprudência do STF, assinale a alternativa correta.",
+  gabarito: "B",
+  alternativas: {
+    A: "Incide sobre a propriedade de veículos automotores terrestres, náuticos e aéreos, de forma uniforme.",
+    B: "O STF firmou entendimento de que o IPVA não incide sobre embarcações e aeronaves, por não guardarem relação com a tradição histórica do imposto, que sucedeu a antiga Taxa Rodoviária Única.",
+    C: "É imposto de competência municipal, com arrecadação total revertida ao Município de licenciamento do veículo.",
+    D: "Não admite alíquotas diferenciadas em razão do tipo, valor, utilização ou impacto ambiental do veículo."
+  },
+  feedbacks: {
+    A: "Incorreta. O STF excluiu expressamente embarcações e aeronaves da incidência do IPVA — não há uniformidade entre veículos terrestres, náuticos e aéreos.",
+    B: "Correta! Nos RE 134.509 e RE 379.572, o STF entendeu que o IPVA não incide sobre embarcações e aeronaves, pois o imposto sucedeu historicamente a Taxa Rodoviária Única, vocacionada a veículos terrestres.",
+    C: "Incorreta. O IPVA é imposto ESTADUAL (art. 155, III, CF), com apenas 50% da arrecadação repassada ao Município de licenciamento (art. 158, III, CF) — não a totalidade.",
+    D: "Incorreta. A EC 132/2023 passou a admitir expressamente alíquotas diferenciadas em razão do tipo, valor, utilização e impacto ambiental do veículo (art. 155, §6º, II, CF)."
+  },
+  fundamento: "RE 134.509 e RE 379.572, STF — IPVA não incide sobre embarcações e aeronaves. Art. 155, III, CF — competência estadual. Art. 158, III, CF — repasse de 50% ao Município. Art. 155, §6º, II, CF (EC 132/2023) — alíquotas diferenciadas.",
+  caqui: "O IPVA nasceu como 'sucessor' da Taxa Rodoviária Única — por isso, para o STF, ele fica restrito à estrada. Barco e avião ficam de fora dessa história. E lembre: metade da arrecadação vai para o Município onde o veículo é licenciado, não a totalidade."
+},
+{
+  num: 13,
+  exame: "",
+  titulo: "ITCMD — Regras de Competência",
+  enunciado: "O art. 155, §1º, da CF estabelece critérios distintos para definir a competência do ITCMD conforme a natureza do bem transmitido.",
+  comando: "Quanto ao ITCMD, assinale a alternativa correta.",
+  gabarito: "A",
+  alternativas: {
+    A: "Compete ao Estado da situação do bem, se imóvel e respectivos direitos, e ao Estado onde se processar o inventário/arrolamento ou tiver domicílio o doador, se bens móveis, títulos e créditos.",
+    B: "É imposto de competência exclusivamente municipal, com alíquota máxima fixada por resolução da Câmara Municipal.",
+    C: "Não admite progressividade de alíquotas em nenhuma hipótese, por se tratar de imposto real.",
+    D: "Incide sobre a transmissão onerosa de bens imóveis entre vivos."
+  },
+  feedbacks: {
+    A: "Correta! O art. 155, §1º, I e II, CF fixa exatamente essa distinção de competência entre bens imóveis (Estado da situação) e bens móveis/títulos/créditos (Estado do inventário ou do domicílio do doador).",
+    B: "Incorreta. O ITCMD é imposto ESTADUAL (art. 155, I, CF), não municipal, e sua alíquota máxima é fixada por resolução do SENADO FEDERAL, não da Câmara Municipal.",
+    C: "Incorreta. O STF (RE 562.045, Tema 21) admite a progressividade de alíquotas no ITCMD, mesmo sendo imposto real, com base na capacidade contributiva.",
+    D: "Incorreta. A transmissão onerosa entre vivos de bem imóvel é fato gerador do ITBI, não do ITCMD (que tributa transmissão causa mortis e doação)."
+  },
+  fundamento: "Art. 155, §1º, I e II, CF — competência do ITCMD conforme a natureza do bem. RE 562.045, STF (Tema 21) — progressividade admitida no ITCMD.",
+  caqui: "Regra prática: bem imóvel → manda o Estado onde ele está. Bem móvel, título ou crédito → manda o Estado do inventário (morte) ou do domicílio do doador (doação em vida). E, diferente do ITBI, o ITCMD pode sim ser progressivo — o STF já validou isso."
+},
+{
+  num: 14,
+  exame: "",
+  titulo: "ITCMD — Alíquota Máxima",
+  enunciado: "A fixação de teto para as alíquotas do ITCMD é atribuição de órgão específico, distinto do que ocorre com outros impostos estaduais.",
+  comando: "A alíquota máxima do ITCMD é fixada por qual órgão, e qual o percentual atualmente vigente?",
+  gabarito: "B",
+  alternativas: {
+    A: "Pela Câmara dos Deputados, mediante lei ordinária federal, fixada em 20%.",
+    B: "Pelo Senado Federal, mediante resolução, atualmente fixada em 8% (Resolução nº 9/1992).",
+    C: "Pelo CONFAZ, mediante convênio, fixada em 18%.",
+    D: "Não há teto constitucional para as alíquotas do ITCMD."
+  },
+  feedbacks: {
+    A: "Incorreta. Não é a Câmara dos Deputados, nem lei ordinária federal, que fixa o teto — é o Senado Federal, por resolução.",
+    B: "Correta! O art. 155, §1º, IV, CF atribui ao Senado Federal a fixação da alíquota máxima do ITCMD, mediante resolução. A Resolução do Senado nº 9/1992 fixou o teto em 8%, ainda vigente.",
+    C: "Incorreta. O CONFAZ trata de convênios do ICMS, não do ITCMD.",
+    D: "Incorreta. Há sim teto constitucional, fixado pelo Senado."
+  },
+  fundamento: "Art. 155, §1º, IV, CF — competência do Senado Federal para fixar a alíquota máxima do ITCMD por resolução. Resolução do Senado nº 9/1992 — teto de 8%.",
+  caqui: "Sempre que a prova perguntar 'quem trava o teto do ITCMD', a resposta é Senado Federal, resolução, 8%. Decore esse combo — é recorrente."
+},
+{
+  num: 15,
+  exame: "",
+  titulo: "IPTU — Progressividade Fiscal e Extrafiscal",
+  enunciado: "A EC 29/2000 ampliou as possibilidades de progressividade do IPTU, que hoje convive com outra forma de progressividade prevista desde a redação original da Constituição de 1988.",
+  comando: "Sobre a progressividade do IPTU, assinale a alternativa correta.",
+  gabarito: "A",
+  alternativas: {
+    A: "Admite-se a progressividade fiscal, em razão do valor do imóvel (art. 156, §1º, I, CF), e a progressividade extrafiscal no tempo, como instrumento de política urbana para desestimular o não aproveitamento do solo urbano (art. 182, §4º, II, CF).",
+    B: "Somente é admitida a progressividade extrafiscal, sendo vedada a progressividade em razão do valor venal do imóvel.",
+    C: "É vedada qualquer forma de progressividade do IPTU, por se tratar de imposto real, conforme entendimento pacífico e atual do STF.",
+    D: "A progressividade do IPTU somente pode ser aplicada a imóveis rurais."
+  },
+  feedbacks: {
+    A: "Correta! Após a EC 29/2000, o IPTU admite progressividade fiscal por valor do imóvel (art. 156, §1º, I, CF) e progressividade extrafiscal no tempo, para imóvel não edificado, subutilizado ou não utilizado (art. 182, §4º, II, CF).",
+    B: "Incorreta. A progressividade fiscal em razão do valor venal é expressamente admitida desde a EC 29/2000.",
+    C: "Incorreta. Esse entendimento (Súmula 668, STF) era aplicável ANTES da EC 29/2000; hoje está superado — a progressividade fiscal é constitucional.",
+    D: "Incorreta. O IPTU incide sobre imóveis URBANOS — a progressividade se aplica justamente a esses, não a imóveis rurais (que são tributados pelo ITR)."
+  },
+  fundamento: "Art. 156, §1º, I, CF (EC 29/2000) — progressividade fiscal pelo valor do imóvel. Art. 182, §4º, II, CF — progressividade extrafiscal no tempo, regulamentada pelo Estatuto da Cidade. Súmula 668, STF — superada pela EC 29/2000.",
+  caqui: "O IPTU hoje tem 'dois motores' de progressividade: um fiscal (quanto mais caro o imóvel, maior a alíquota) e um extrafiscal no tempo (imóvel urbano parado e mal aproveitado paga cada vez mais, para forçar o dono a dar função social a ele). Antes de 2000, só existia essa segunda forma — hoje as duas convivem."
+},
+{
+  num: 16,
+  exame: "",
+  titulo: "ITBI — Vedação à Progressividade",
+  enunciado: "Diferentemente do que ocorre com o ITCMD, o STF possui entendimento sumulado especificamente sobre a impossibilidade de progressividade no ITBI.",
+  comando: "Sobre o ITBI, assinale a alternativa correta.",
+  gabarito: "A",
+  alternativas: {
+    A: "É inconstitucional lei municipal que estabeleça alíquotas progressivas para o ITBI com base no valor venal do imóvel, conforme entendimento sumulado do STF, distinto do que ocorre com o ITCMD.",
+    B: "Incide sobre a transmissão causa mortis de bens imóveis, sendo de competência municipal.",
+    C: "É imune em qualquer transmissão de bem imóvel para integralização de capital social, sem exceções.",
+    D: "Sua base de cálculo deve necessariamente coincidir com o valor venal utilizado para fins de IPTU."
+  },
+  feedbacks: {
+    A: "Correta! A Súmula 656 do STF é expressa: 'é inconstitucional a lei que estabelece alíquotas progressivas para o ITBI com base no valor venal do imóvel' — ao contrário do ITCMD, para o qual o STF autorizou a progressividade (RE 562.045).",
+    B: "Incorreta. Transmissão causa mortis é fato gerador do ITCMD, não do ITBI (que tributa transmissão inter vivos e onerosa).",
+    C: "Incorreta. A imunidade na integralização de capital (art. 156, §2º, I, CF) NÃO se aplica se a atividade preponderante do adquirente for compra e venda, locação ou arrendamento de bens imóveis.",
+    D: "Incorreta. Pelo Tema 1.113/STF, a base de cálculo do ITBI é o valor de mercado do imóvel transmitido, não necessariamente vinculado ao valor venal usado para o IPTU."
+  },
+  fundamento: "Súmula 656, STF — vedação à progressividade do ITBI. Art. 156, §2º, I, CF — imunidade na integralização de capital, com exceção da atividade preponderante imobiliária. Tema 1.113, STF — base de cálculo pelo valor de mercado da transação.",
+  caqui: "ITBI e ITCMD são 'primos', mas com destinos diferentes na jurisprudência: o ITCMD pode ser progressivo, o ITBI não pode — Súmula 656 trava isso. E a imunidade na integralização de capital tem uma exceção clássica: se a empresa vive de comprar, vender, alugar ou arrendar imóveis, a imunidade cai."
+},
+{
+  num: 17,
+  exame: "",
+  titulo: "ISS — Lista de Serviços e Alíquotas",
+  enunciado: "O ISS é regido pela LC 116/2003, que estabelece uma lista de serviços tributáveis e limites de alíquota aplicáveis em todo o território nacional.",
+  comando: "Sobre o ISS, assinale a alternativa correta.",
+  gabarito: "A",
+  alternativas: {
+    A: "É regido pela LC 116/2003, incide sobre serviços constantes de lista taxativa, mas admite interpretação extensiva para alcançar serviços correlatos aos expressamente previstos em cada item, segundo entendimento do STJ.",
+    B: "É de competência estadual, com alíquota mínima de 5% fixada por resolução do Senado.",
+    C: "Incide sobre operações de circulação de mercadorias associadas à prestação de serviço, cumulativamente com o ICMS, em qualquer hipótese.",
+    D: "Não possui alíquota mínima ou máxima definida em âmbito nacional, cabendo a cada Município fixá-la livremente."
+  },
+  feedbacks: {
+    A: "Correta! O ISS é de competência municipal (art. 156, III, CF), regido pela LC 116/2003; a lista de serviços é taxativa, mas o STJ admite interpretação extensiva dentro de cada item, para alcançar atividades correlatas.",
+    B: "Incorreta. O ISS é de competência MUNICIPAL, não estadual, e sua alíquota mínima é de 2% (art. 88, ADCT), não 5%.",
+    C: "Incorreta. Havendo serviço previsto na lista da LC 116/2003, incide o ISS sobre o valor total, ressalvadas exceções expressas de tributação mista com o ICMS — não é cumulação em qualquer hipótese.",
+    D: "Incorreta. Há teto e piso nacionais: alíquota mínima de 2% (art. 88, ADCT) e máxima de 5% (art. 8º-A, LC 116/2003)."
+  },
+  fundamento: "Art. 156, III, CF — competência municipal. Art. 88, ADCT (EC 37/2002) — alíquota mínima de 2%. Art. 8º-A, LC 116/2003 (LC 157/2016) — alíquota máxima de 5%. Jurisprudência do STJ sobre interpretação extensiva da lista.",
+  caqui: "A lista de serviços do ISS é taxativa, mas não é engessada: o STJ permite enxergar serviços parecidos dentro do mesmo item, mesmo sem citação nominal expressa. E lembre da régua nacional: nunca menos de 2%, nunca mais de 5%, em qualquer Município do Brasil."
+},
+{
+  num: 18,
+  exame: "",
+  titulo: "ISS x ICMS — Critério de Distinção",
+  enunciado: "Em operações que combinam fornecimento de mercadoria e prestação de serviço, a jurisprudência consolidou um critério objetivo para definir qual imposto incide.",
+  comando: "O critério fundamental para distinguir a incidência do ISS e do ICMS sobre uma mesma operação (venda de mercadoria com prestação de serviço agregado) é:",
+  gabarito: "B",
+  alternativas: {
+    A: "O valor da operação: operações acima de determinado teto sujeitam-se ao ICMS, e abaixo, ao ISS.",
+    B: "O serviço estar ou não previsto na lista de serviços da LC 116/2003: se previsto, incide o ISS sobre o valor total (ressalvadas exceções expressas de tributação mista); se não previsto, incide o ICMS sobre o valor da mercadoria.",
+    C: "A localização do estabelecimento prestador, sendo irrelevante a natureza da atividade.",
+    D: "A opção do contribuinte pelo regime tributário mais vantajoso."
+  },
+  feedbacks: {
+    A: "Incorreta. Não existe critério de 'teto de valor' para definir a incidência entre ISS e ICMS — o critério é a natureza da atividade (serviço listado ou mercadoria).",
+    B: "Correta! Havendo serviço previsto na lista da LC 116/2003 associado ao fornecimento de mercadorias, incide o ISS sobre o valor total, salvo ressalva expressa de tributação mista com o ICMS; se o serviço não constar da lista, incide o ICMS sobre a circulação de mercadoria.",
+    C: "Incorreta. A localização do estabelecimento é relevante para definir o Município competente para cobrar o ISS, mas não é o critério de distinção entre ISS e ICMS.",
+    D: "Incorreta. O enquadramento tributário decorre da lei, não é uma opção do contribuinte."
+  },
+  fundamento: "LC 116/2003 e sua lista anexa. Jurisprudência do STF e STJ consolidando o critério: serviço listado → ISS sobre o total; serviço não listado → ICMS sobre a mercadoria (ressalvadas exceções expressas de tributação mista previstas na própria lei).",
+  caqui: "Pense em um checklist de duas perguntas: 'esse serviço está na lista da LC 116?'. Se sim, ISS manda no jogo (salvo se a lei mesma abrir exceção para o ICMS incidir sobre as mercadorias usadas). Se não está na lista, é operação de mercadoria — ICMS."
+},
+{
+  num: 19,
+  exame: "",
+  titulo: "Reforma Tributária — Situação em 2026",
+  enunciado: "A EC 132/2023 estabeleceu um cronograma de transição para o novo modelo de tributação sobre o consumo, com etapas específicas ao longo dos anos.",
+  comando: "Sobre a situação da tributação sobre o consumo no Brasil em 2026, após a EC 132/2023, assinale a alternativa correta.",
+  gabarito: "B",
+  alternativas: {
+    A: "ICMS, ISS, PIS e Cofins já foram extintos, tendo sido totalmente substituídos pelo IBS e pela CBS.",
+    B: "2026 é ano de fase de testes: ICMS, ISS, PIS, Cofins e IPI continuam plenamente vigentes com suas regras normais, enquanto CBS e IBS são cobrados em alíquotas simbólicas (0,9% + 0,1%), com direito a compensação, sem aumento efetivo de carga tributária.",
+    C: "O IBS já substituiu integralmente o ICMS e o ISS desde janeiro de 2026, com extinção definitiva desses tributos estaduais e municipais.",
+    D: "A CBS e o IBS somente entrarão em vigor a partir de 2033, não havendo qualquer obrigação acessória relacionada a eles antes dessa data."
+  },
+  feedbacks: {
+    A: "Incorreta. Nenhum desses tributos foi extinto em 2026 — todos seguem plenamente vigentes durante a fase de testes.",
+    B: "Correta! Em 2026, vigora a fase de testes da Reforma Tributária: CBS e IBS são destacados em alíquotas simbólicas (0,9% + 0,1%), compensáveis com PIS/Cofins, sem aumento real de carga tributária, enquanto ICMS, ISS, PIS, Cofins e IPI seguem plenamente vigentes.",
+    C: "Incorreta. A extinção efetiva de ICMS e ISS está prevista somente para 2033, ao fim da transição escalonada — não já em 2026.",
+    D: "Incorreta. CBS e IBS já produzem efeitos (destaque em documentos fiscais) desde janeiro de 2026, ainda que em alíquota simbólica — não é correto dizer que só existirão a partir de 2033."
+  },
+  fundamento: "EC 132/2023 e LC 214/2025 — cronograma de transição. Em 2026: fase de testes, CBS (0,9%) e IBS (0,1%), compensáveis com PIS/Cofins. Extinção de ICMS/ISS prevista para 2033.",
+  caqui: "2026 é o 'ensaio geral' da reforma: o sistema novo já aparece na nota fiscal, mas em alíquota simbólica e compensável — ninguém paga a mais de verdade ainda. O sistema antigo (ICMS, ISS, PIS, Cofins, IPI) continua rodando normalmente. A troca de verdade só se completa lá na frente, em 2033."
+},
+{
+  num: 20,
+  exame: "",
+  titulo: "Imposto Seletivo (IS) — Novidade da EC 132/2023",
+  enunciado: "A EC 132/2023 criou um novo tributo federal, com nítida função extrafiscal, incidente sobre bens e serviços prejudiciais à saúde ou ao meio ambiente.",
+  comando: "Sobre o Imposto Seletivo (IS), previsto no art. 153, VIII, da CF, assinale a alternativa correta.",
+  gabarito: "A",
+  alternativas: {
+    A: "Incide sobre a produção, extração, comercialização ou importação de bens e serviços prejudiciais à saúde ou ao meio ambiente, não incidindo sobre as exportações e não integrando sua própria base de cálculo.",
+    B: "É de competência dos Estados e do Distrito Federal, substituindo integralmente o ICMS sobre combustíveis.",
+    C: "Incide sobre todo e qualquer produto industrializado, substituindo o IPI a partir de 2026.",
+    D: "Tem finalidade exclusivamente arrecadatória, sem qualquer caráter extrafiscal."
+  },
+  feedbacks: {
+    A: "Correta! O Imposto Seletivo incide sobre produção, extração, comercialização ou importação de bens e serviços prejudiciais à saúde ou ao meio ambiente, não incide sobre exportações e não integra sua própria base de cálculo.",
+    B: "Incorreta. O IS é de competência da UNIÃO (art. 153, VIII, CF), não dos Estados, e não substitui o ICMS sobre combustíveis, que segue com regime próprio (art. 155, §4º, CF).",
+    C: "Incorreta. O IS não incide sobre todo produto industrializado — apenas sobre bens/serviços prejudiciais à saúde ou ao meio ambiente. O IPI continua existindo, sendo reduzido a zero apenas a partir de 2027 (exceto Zona Franca de Manaus), e não é substituído pelo IS.",
+    D: "Incorreta. O IS tem finalidade nitidamente extrafiscal: desestimular o consumo de produtos nocivos, como cigarros, bebidas alcoólicas e veículos poluentes."
+  },
+  fundamento: "Art. 153, VIII, CF (EC 132/2023) — Imposto Seletivo, de competência federal, extrafiscal, não incidente sobre exportações e sem integrar sua própria base de cálculo.",
+  caqui: "Pensa no Imposto Seletivo como o 'imposto do pecado': incide sobre coisas que fazem mal à saúde ou ao meio ambiente — cigarro, bebida, carro poluente. Não é imposto de arrecadação geral, é imposto de desestímulo, e é federal, não estadual."
+},
+{
+  num: 21,
+  exame: "",
+  titulo: "Exceções à Legalidade Tributária",
+  enunciado: "O princípio da legalidade tributária admite mitigações específicas em relação a determinados impostos federais de forte função extrafiscal.",
+  comando: "São exemplos de impostos cujas alíquotas podem ser alteradas por ato do Poder Executivo (dentro dos limites legais), constituindo exceção mitigada ao princípio da legalidade tributária:",
+  gabarito: "B",
+  alternativas: {
+    A: "IR, ITR, IPTU e ITBI.",
+    B: "II, IE, IPI e IOF.",
+    C: "ICMS, ISS, ITCMD e IPVA, em qualquer hipótese.",
+    D: "Todos os impostos, sem exceção, admitem alteração de alíquota por decreto."
+  },
+  feedbacks: {
+    A: "Incorreta. IR, ITR, IPTU e ITBI seguem a regra geral da legalidade tributária — suas alíquotas dependem de lei, sem essa flexibilização por ato do Executivo.",
+    B: "Correta! O art. 153, §1º, CF faculta ao Executivo, nos limites da lei, alterar as alíquotas do II, IE, IPI e IOF — todos impostos com forte caráter extrafiscal.",
+    C: "Incorreta. Não há regra geral de flexibilização para ICMS, ISS, ITCMD e IPVA. O ICMS-combustíveis tem regime próprio específico (art. 155, §4º, CF), mas não é o caso geral desses impostos.",
+    D: "Incorreta. A regra geral é a legalidade estrita; a exceção do art. 153, §1º, CF é pontual, restrita a II, IE, IPI e IOF."
+  },
+  fundamento: "Art. 153, §1º, CF — alteração de alíquotas de II, IE, IPI e IOF por ato do Poder Executivo, dentro dos limites legais.",
+  caqui: "Decore o quarteto: II, IE, IPI, IOF. São os impostos que funcionam como 'volante de política econômica' — o governo pode ajustar a alíquota rapidamente, por decreto, sem esperar aprovação de nova lei em cada mudança."
+},
+{
+  num: 22,
+  exame: "",
+  titulo: "Exceções à Anterioridade Anual e Nonagesimal",
+  enunciado: "Nem todos os impostos que constituem exceção à legalidade tributária são também exceção às duas anterioridades — anual e nonagesimal — simultaneamente.",
+  comando: "Assinale a alternativa que indica corretamente impostos que constituem exceção tanto à anterioridade anual quanto à nonagesimal, podendo ser cobrados imediatamente após a publicação da lei que os instituiu ou majorou:",
+  gabarito: "B",
+  alternativas: {
+    A: "IPI e ICMS-combustíveis.",
+    B: "II, IE, IOF e Imposto Extraordinário de Guerra.",
+    C: "IR e ITR.",
+    D: "IPTU e IPVA, quanto à fixação da base de cálculo."
+  },
+  feedbacks: {
+    A: "Incorreta. O IPI é exceção apenas à anterioridade anual, sujeitando-se à nonagesimal — não é exceção às duas simultaneamente.",
+    B: "Correta! II, IE, IOF e o Imposto Extraordinário de Guerra são exceção a AMBAS as anterioridades (art. 150, §1º, CF), podendo ser cobrados de imediato.",
+    C: "Incorreta. O IR é exceção apenas à nonagesimal, sujeitando-se à anual; e o ITR não é exceção a nenhuma das duas anterioridades.",
+    D: "Incorreta. A fixação da base de cálculo do IPTU e do IPVA é exceção apenas à nonagesimal, sujeitando-se à anterioridade anual."
+  },
+  fundamento: "Art. 150, §1º, CF — impostos exceção às duas anterioridades: II, IE, IOF e Imposto Extraordinário de Guerra. IPI: exceção só à anual. IR: exceção só à nonagesimal. Base de cálculo de IPTU/IPVA: exceção só à nonagesimal.",
+  caqui: "Monte uma tabelinha mental: 'exceção às duas' (II, IE, IOF, Guerra) — cobrança imediata. 'Exceção só à anual' (IPI) — espera 90 dias. 'Exceção só à nonagesimal' (IR) — espera o ano virar. Cada imposto tem sua própria combinação, e a banca adora trocar as peças desse quebra-cabeça."
+},
+{
+  num: 23,
+  exame: "",
+  titulo: "Competência Residual da União",
+  enunciado: "Além dos impostos expressamente previstos no art. 153 da CF, a União possui competência para instituir novos impostos, observados requisitos formais e materiais específicos.",
+  comando: "A União, no exercício de sua competência residual para instituir novos impostos além dos previstos no art. 153 da CF, deve observar, EXCETO:",
+  gabarito: "D",
+  alternativas: {
+    A: "Instituição mediante lei complementar.",
+    B: "Caráter não cumulativo do novo imposto.",
+    C: "Fato gerador e base de cálculo diversos dos discriminados na Constituição para os impostos já existentes.",
+    D: "Aprovação prévia, por convênio, de todos os Estados e do Distrito Federal."
+  },
+  feedbacks: {
+    A: "Incorreta (é exigência real). O art. 154, I, CF exige lei complementar para o exercício da competência residual.",
+    B: "Incorreta (é exigência real). O novo imposto deve ser não cumulativo, nos termos do mesmo dispositivo.",
+    C: "Incorreta (é exigência real). O fato gerador e a base de cálculo devem ser diversos dos já discriminados na Constituição para os impostos existentes.",
+    D: "Correta! Não há exigência de aprovação prévia por convênio dos Estados e do DF — trata-se de competência exclusiva da União, exercida por lei complementar federal, sem necessidade de anuência estadual."
+  },
+  fundamento: "Art. 154, I, CF — competência residual da União: lei complementar, não cumulatividade, fato gerador e base de cálculo diversos dos impostos já existentes. Não há exigência de convênio.",
+  caqui: "A competência residual é 'territorial exclusivo' da União: ela decide sozinha, por lei complementar, sem precisar de aval dos Estados. As três exigências reais são lei complementar + não cumulatividade + novidade de fato gerador/base de cálculo. Convênio com Estados não entra nessa equação."
+},
+{
+  num: 24,
+  exame: "",
+  titulo: "ICMS — DIFAL nas Operações Interestaduais (EC 87/2015)",
+  enunciado: "A EC 87/2015 alterou as regras de partilha do ICMS nas operações interestaduais destinadas a consumidor final, equalizando o tratamento entre contribuintes e não contribuintes do imposto.",
+  comando: "Em uma operação de venda de mercadoria por estabelecimento situado no Estado 'A' com destino a consumidor final não contribuinte do ICMS localizado no Estado 'B', a partir da EC 87/2015, o ICMS relativo à diferença entre a alíquota interna do Estado 'B' e a interestadual será devido:",
+  gabarito: "B",
+  alternativas: {
+    A: "Integralmente ao Estado 'A', de origem da mercadoria.",
+    B: "Ao Estado 'B', destinatário da mercadoria, correspondente ao diferencial de alíquotas (DIFAL).",
+    C: "Ao Distrito Federal, independentemente da localização das partes.",
+    D: "Não é devido ICMS algum nessa operação, por se tratar de consumidor final."
+  },
+  feedbacks: {
+    A: "Incorreta. Antes da EC 87/2015, quando o destinatário não era contribuinte, todo o ICMS ficava com o Estado de origem — essa regra foi alterada justamente para corrigir esse desequilíbrio.",
+    B: "Correta! A EC 87/2015 (art. 155, §2º, VII e VIII, CF) determina que, em operação interestadual a consumidor final, contribuinte ou não, aplica-se a alíquota interestadual, cabendo ao Estado de destino o diferencial de alíquotas (DIFAL).",
+    C: "Incorreta. O destino do DIFAL é o Estado de localização do consumidor final ('B' no exemplo), e não o Distrito Federal, salvo se o DF for justamente o Estado de destino.",
+    D: "Incorreta. Há sim incidência normal de ICMS nessa operação, com partilha entre origem e destino conforme a EC 87/2015."
+  },
+  fundamento: "Art. 155, §2º, VII e VIII, CF (EC 87/2015) — partilha do ICMS em operações interestaduais a consumidor final, com DIFAL destinado ao Estado de destino.",
+  caqui: "Antes de 2015, vender para consumidor final não contribuinte em outro Estado significava 'ganha tudo' para o Estado vendedor — o que prejudicava muito os Estados compradores, especialmente com a explosão do comércio eletrônico. A EC 87/2015 dividiu o bolo: alíquota interestadual fica com a origem, e a diferença (DIFAL) vai para o destino."
+},
+{
+  num: 25,
+  exame: "",
+  titulo: "IPTU x ITR — Critério da Destinação",
+  enunciado: "O STJ construiu entendimento específico sobre qual critério prevalece para definir a incidência de IPTU ou ITR sobre determinado imóvel, superando a leitura isolada do critério de localização.",
+  comando: "Para fins de definição da incidência de IPTU ou ITR sobre um imóvel, o critério adotado predominantemente pela jurisprudência do STJ é:",
+  gabarito: "B",
+  alternativas: {
+    A: "Exclusivamente a localização do imóvel dentro do perímetro urbano definido em lei municipal, sendo irrelevante sua destinação.",
+    B: "O critério da destinação econômica do imóvel: ainda que localizado em zona urbana, se comprovadamente utilizado em exploração extrativa, agrícola, pecuária ou agroindustrial, incide o ITR, e não o IPTU (aplicação do Decreto-Lei 57/66).",
+    C: "O valor venal do imóvel, sendo IPTU para imóveis de maior valor e ITR para os de menor valor.",
+    D: "A nacionalidade do proprietário do imóvel."
+  },
+  feedbacks: {
+    A: "Incorreta. Embora o art. 32 do CTN adote o critério da localização, o STJ, com base no Decreto-Lei 57/1966, dá prevalência ao critério da destinação econômica.",
+    B: "Correta! O STJ firmou entendimento de que, com base no Decreto-Lei 57/1966 (recepcionado como lei complementar), prevalece o critério da destinação: imóvel comprovadamente utilizado em exploração extrativa, agrícola, pecuária ou agroindustrial é tributado pelo ITR, ainda que localizado em área urbana.",
+    C: "Incorreta. Não existe critério de valor venal para diferenciar IPTU de ITR — a distinção é de localização/destinação, não de faixa de valor.",
+    D: "Incorreta. A nacionalidade do proprietário é absolutamente irrelevante para a incidência de IPTU ou ITR."
+  },
+  fundamento: "Art. 32, CTN — critério da localização (zona urbana definida em lei municipal). Decreto-Lei 57/1966 — critério da destinação, prevalente na jurisprudência do STJ para imóveis com exploração extrativa, agrícola, pecuária ou agroindustrial.",
+  caqui: "Regra de ouro do STJ: manda mais a função do imóvel do que o endereço dele. Um sítio produtivo dentro do perímetro urbano da cidade continua sendo tributado como rural (ITR), porque o que importa é para que ele está sendo usado, não só onde ele está desenhado no mapa."
+},
+{
+  num: 26,
+  exame: "",
+  titulo: "Panorama Geral dos Impostos em Espécie",
+  enunciado: "A distribuição constitucional dos impostos entre União, Estados/DF e Municípios é rígida e serve de base para a resolução de praticamente qualquer questão de competência tributária.",
+  comando: "Assinale a alternativa que corretamente relaciona os impostos à sua classificação quanto ao ente competente:",
+  gabarito: "A",
+  alternativas: {
+    A: "Federais: II, IE, IR, IPI, IOF, ITR, IGF e Imposto Seletivo. Estaduais: ICMS, IPVA e ITCMD. Municipais: IPTU, ITBI e ISS.",
+    B: "Federais: ICMS, ISS e IPVA. Estaduais: II, IE e IR. Municipais: IPTU, ITBI e IOF.",
+    C: "Federais: IPTU, ITBI e ISS. Estaduais: ICMS, IPVA e ITCMD. Municipais: II, IE, IR, IPI e IOF.",
+    D: "Todos os impostos listados são de competência exclusiva da União, cabendo aos Estados e Municípios apenas a arrecadação delegada."
+  },
+  feedbacks: {
+    A: "Correta! Federais (art. 153/154, CF): II, IE, IR, IPI, IOF, ITR, IGF (não instituído) e Imposto Seletivo (EC 132/2023). Estaduais (art. 155, CF): ICMS, IPVA e ITCMD. Municipais (art. 156, CF): IPTU, ITBI e ISS.",
+    B: "Incorreta. A distribuição está completamente trocada: ICMS/ISS/IPVA não são federais, e II/IE/IR não são estaduais.",
+    C: "Incorreta. IPTU/ITBI/ISS são municipais, não federais; e II/IE/IR/IPI/IOF são federais, não municipais.",
+    D: "Incorreta. A competência para instituir cada imposto é privativa de cada ente (rígida), e não mera arrecadação delegada pela União."
+  },
+  fundamento: "Art. 153, CF — impostos federais. Art. 155, CF — impostos estaduais/DF. Art. 156, CF — impostos municipais/DF. Distribuição rígida e taxativa.",
+  caqui: "Fechando com o mapa completo: Federais (II, IE, IR, IPI, IOF, ITR, IGF, Imposto Seletivo), Estaduais (ICMS, IPVA, ITCMD), Municipais (IPTU, ITBI, ISS). Esse mapa resolve sozinho boa parte das questões de competência tributária — vale a pena gravar de olhos fechados."
+}
+];
+
+let current = 0;
+const estado = Array(QUESTOES.length).fill(null);
+
+function init() {
+  const nav = document.getElementById('nav-wrap');
+  const container = document.getElementById('questions-container');
+
+  QUESTOES.forEach((q, i) => {
+    const nb = document.createElement('button');
+    nb.className = 'nav-btn' + (i === 0 ? ' active' : '');
+    nb.textContent = i + 1;
+    nb.onclick = () => goTo(i);
+    nb.id = 'nav-' + i;
+    nav.appendChild(nb);
+
+    const card = document.createElement('div');
+    card.className = 'q-card' + (i === 0 ? ' visible' : '');
+    card.id = 'card-' + i;
+    card.innerHTML = buildCard(q, i);
+    container.appendChild(card);
+  });
+
+  updatePagination();
+  updateScore();
+}
+
+function buildCard(q, i) {
+  const alts = Object.entries(q.alternativas).map(([letra, texto]) =>
+    `<button class="alt-btn" onclick="responder(${i}, '${letra}', this)" data-letra="${letra}">
+      <span class="alt-letter">${letra}</span>
+      <span class="alt-text">${texto}</span>
+    </button>`
+  ).join('');
+
+  return `
+    <div class="q-header">
+      <span class="q-num">Questão ${q.num}</span>
+      ${q.exame ? `<span class="q-exame">${q.exame}</span>` : ''}
+    </div>
+    <h2 class="q-titulo">${q.titulo}</h2>
+    <div class="enunciado">${q.enunciado}</div>
+    <p class="comando">${q.comando}</p>
+    <div class="alternativas" id="alts-${i}">${alts}</div>
+    <div class="feedback" id="fb-${i}"></div>
+    <div class="fundamento-box" id="fund-${i}">
+      <h4>📖 Fundamento legal</h4>
+      ${q.fundamento}
+    </div>
+    <div class="caqui-box" id="caqui-${i}">
+      <h4>🍊 Explicação didática do Professor Caqui</h4>
+      ${q.caqui}
+    </div>
+    <div class="card-actions">
+      <div class="btn-group">
+        <button class="btn purple" id="btn-fund-${i}" onclick="toggleFund(${i})">Ver fundamento legal</button>
+        <button class="btn caqui" id="btn-caqui-${i}" onclick="toggleCaqui(${i})">Explicação do Prof. Caqui</button>
+        <button class="btn" id="btn-reset-${i}" onclick="resetQ(${i})">↺ Tentar novamente</button>
+      </div>
+      <span class="status-text" id="status-${i}"></span>
+    </div>
+  `;
+}
+
+function responder(idx, letra, btn) {
+  if (estado[idx] !== null) return;
+  estado[idx] = letra;
+
+  const q = QUESTOES[idx];
+  const alts = document.querySelectorAll(`#alts-${idx} .alt-btn`);
+  alts.forEach(b => {
+    b.disabled = true;
+    if (b.dataset.letra === q.gabarito) b.classList.add('correct');
+    if (b.dataset.letra === letra && letra !== q.gabarito) b.classList.add('wrong');
+  });
+
+  const acertou = letra === q.gabarito;
+  const fb = document.getElementById('fb-' + idx);
+  fb.className = 'feedback show ' + (acertou ? 'acerto' : 'erro');
+  fb.innerHTML = `<strong>${acertou ? '✓ Correta!' : '✗ Incorreta.'}</strong> ${q.feedbacks[letra]}`;
+
+  document.getElementById('status-' + idx).textContent = acertou ? 'Acerto!' : 'Gabarito: ' + q.gabarito;
+  document.getElementById('btn-reset-' + idx).className = 'btn show';
+  document.getElementById('btn-fund-' + idx).className = 'btn purple show';
+  document.getElementById('btn-caqui-' + idx).className = 'btn caqui show';
+
+  const navBtn = document.getElementById('nav-' + idx);
+  navBtn.classList.remove('active');
+  navBtn.classList.add(acertou ? 'correto' : 'errado');
+  if (idx === current) navBtn.classList.add('active');
+
+  updateScore();
+}
+
+function toggleFund(idx) {
+  const box = document.getElementById('fund-' + idx);
+  const btn = document.getElementById('btn-fund-' + idx);
+  const visible = box.classList.contains('show');
+  box.className = visible ? 'fundamento-box' : 'fundamento-box show';
+  btn.textContent = visible ? 'Ver fundamento legal' : 'Ocultar fundamento';
+}
+
+function toggleCaqui(idx) {
+  const box = document.getElementById('caqui-' + idx);
+  const btn = document.getElementById('btn-caqui-' + idx);
+  const visible = box.classList.contains('show');
+  box.className = visible ? 'caqui-box' : 'caqui-box show';
+  btn.textContent = visible ? 'Explicação do Prof. Caqui' : 'Ocultar explicação';
+}
+
+function resetQ(idx) {
+  estado[idx] = null;
+  const alts = document.querySelectorAll(`#alts-${idx} .alt-btn`);
+  alts.forEach(b => { b.disabled = false; b.className = 'alt-btn'; });
+  document.getElementById('fb-' + idx).className = 'feedback';
+  document.getElementById('fund-' + idx).className = 'fundamento-box';
+  document.getElementById('btn-fund-' + idx).className = 'btn purple';
+  document.getElementById('btn-fund-' + idx).textContent = 'Ver fundamento legal';
+  document.getElementById('caqui-' + idx).className = 'caqui-box';
+  document.getElementById('btn-caqui-' + idx).className = 'btn caqui';
+  document.getElementById('btn-caqui-' + idx).textContent = 'Explicação do Prof. Caqui';
+  document.getElementById('btn-reset-' + idx).className = 'btn';
+  document.getElementById('status-' + idx).textContent = '';
+
+  const navBtn = document.getElementById('nav-' + idx);
+  navBtn.className = 'nav-btn' + (idx === current ? ' active' : '');
+
+  updateScore();
+}
+
+function goTo(idx) {
+  document.getElementById('card-' + current).classList.remove('visible');
+  document.getElementById('nav-' + current).classList.remove('active');
+  current = idx;
+  document.getElementById('card-' + current).classList.add('visible');
+  const navBtn = document.getElementById('nav-' + current);
+  navBtn.classList.add('active');
+  updatePagination();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function navPage(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < QUESTOES.length) goTo(next);
+}
+
+function updatePagination() {
+  document.getElementById('pg-info').textContent = (current + 1) + ' de ' + QUESTOES.length;
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === QUESTOES.length - 1;
+}
+
+function updateScore() {
+  const respondidas = estado.filter(e => e !== null).length;
+  const acertos = estado.filter((e, i) => e === QUESTOES[i].gabarito).length;
+  const erros = respondidas - acertos;
+  document.getElementById('sc-total').textContent = respondidas;
+  document.getElementById('sc-acertos').textContent = acertos;
+  document.getElementById('sc-erros').textContent = erros;
+  const pct = Math.round((respondidas / QUESTOES.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = respondidas + ' de ' + QUESTOES.length + ' respondidas';
+}
+
+init();
+</script>
+</body>
+</html>
